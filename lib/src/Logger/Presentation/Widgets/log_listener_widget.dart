@@ -16,10 +16,13 @@ class LogListenerWidget extends StatefulWidget {
 }
 
 class _LogListenerWidgetState extends State<LogListenerWidget> {
+  final loggerController = GetIt.I<LoggerController>();
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<LoggerState>(
-      stream: GetIt.I<LoggerController>().loggerStream,
+      initialData: loggerController.state,
+      stream: loggerController.loggerStream,
       builder: (context, snapshot) {
         final data = snapshot.data?.logs;
         if (snapshot.hasData && data != null) {

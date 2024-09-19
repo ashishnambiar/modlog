@@ -15,13 +15,12 @@ class LoggerState extends Equatable {
     LogInfo? logs,
     LoggerOverlayState? overlayState,
     NetworkLoggerState? networkLoggerState,
-  }) {
-    return LoggerState(
-      logs: logs ?? this.logs,
-      overlayState: overlayState ?? this.overlayState,
-      networkLoggerState: networkLoggerState ?? this.networkLoggerState,
-    );
-  }
+  }) =>
+      LoggerState(
+        logs: logs ?? this.logs,
+        overlayState: overlayState ?? this.overlayState,
+        networkLoggerState: networkLoggerState ?? this.networkLoggerState,
+      );
 
   @override
   List<Object?> get props => [
@@ -82,14 +81,99 @@ final class LoggerOverlayOpened extends LoggerOverlayState {
 
 final class NetworkLoggerState extends Equatable {
   final Map<String, NetworkLoggerData> networkLogs;
+  final NetLogFilter? filter;
   const NetworkLoggerState({
     required this.networkLogs,
+    this.filter,
   });
 
-  int get count => networkLogs.length;
+  int get count => filteredLogs.length;
+
+  Map<String, NetworkLoggerData> get filteredLogs {
+    final logs = <String, NetworkLoggerData>{};
+    for (final e in networkLogs.entries) {
+      switch (filter) {
+        case MethodFilter(method: final method):
+          if (e.value.request?.method.toLowerCase() ==
+              method.name.toLowerCase()) {
+            logs.addEntries([e]);
+          }
+        case StatusFilter():
+        case null:
+          return networkLogs;
+      }
+    }
+    return logs;
+  }
+
+  NetworkLoggerState copyWith({
+    Map<String, NetworkLoggerData>? networkLogs,
+    NetLogFilter? filter,
+  }) =>
+      NetworkLoggerState(
+        networkLogs: networkLogs ?? this.networkLogs,
+        filter: filter ?? this.filter,
+      );
+
+  NetworkLoggerState clearFilter() => NetworkLoggerState(
+        networkLogs: networkLogs,
+        filter: null,
+      );
 
   @override
-  List<Object?> get props => [networkLogs];
+  List<Object?> get props => [
+        networkLogs,
+        filter,
+      ];
+}
+
+sealed class NetLogFilter extends Equatable {
+  const NetLogFilter();
+
+  @override
+  List<Object?> get props => [];
+}
+
+enum MethodType {
+  get,
+  post,
+  put,
+  delete,
+  patch,
+  head,
+  options,
+  trace,
+}
+
+class MethodFilter extends NetLogFilter {
+  const MethodFilter(this.method);
+  final MethodType method;
+
+  @override
+  List<Object?> get props => [method];
+}
+
+enum StatusType {
+  informational(100, 199),
+  successful(200, 299),
+  redirection(300, 399),
+  clientError(400, 499),
+  serverError(500, 599);
+
+  final int max;
+  final int min;
+  const StatusType(
+    this.max,
+    this.min,
+  );
+}
+
+class StatusFilter extends NetLogFilter {
+  const StatusFilter(this.status);
+  final StatusType status;
+
+  @override
+  List<Object?> get props => [status];
 }
 
 class NetworkLoggerData extends Equatable {

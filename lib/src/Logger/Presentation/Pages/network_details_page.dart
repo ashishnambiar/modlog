@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../Utils/logger_appbar.dart';
 
 import '../../Controller/controller.dart';
 import '../../Utils/netowork_interceptor.dart';
@@ -37,7 +38,7 @@ class _NetworkDetailsPageState extends State<NetworkDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Details')),
+      appBar: const LoggerAppBar(title: 'Details'),
       body: Scrollbar(
         child: ListView(
           padding: const EdgeInsets.all(10),

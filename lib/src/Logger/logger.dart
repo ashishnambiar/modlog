@@ -52,6 +52,7 @@ class _LoggerWidgetState extends State<LoggerScope> {
   OverlayEntry _overlayWidget() {
     return OverlayEntry(
       builder: (context) => StreamBuilder<LoggerOverlayState>(
+        initialData: loggerController.state.overlayState,
         stream: loggerController //
             .loggerStream
             .transform(

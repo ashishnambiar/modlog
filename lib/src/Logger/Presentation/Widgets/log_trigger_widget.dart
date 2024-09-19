@@ -36,7 +36,7 @@ class _LogTriggerWidgetState extends State<LogTriggerWidget> {
           },
           onInterrupted: () {
             _count++;
-            if (_count >= widget.maxCount - 1) {
+            if (_count >= widget.maxCount) {
               loggerController.openLogger(context);
             }
           },

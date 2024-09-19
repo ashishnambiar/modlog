@@ -45,28 +45,28 @@ class LoggerController {
 
   void _logging(LogInfo buf) {
     _loggerSink.add(
-      _state.copyWith(logs: buf),
+      state.copyWith(logs: buf),
     );
   }
 
   void openLogger(context) => _loggerSink.add(
-        _state.copyWith(overlayState: LoggerOverlayOpened(context: context)),
+        state.copyWith(overlayState: LoggerOverlayOpened(context: context)),
       );
   void closeLogger() => _loggerSink.add(
-        _state.copyWith(overlayState: LoggerOverlayClosed()),
+        state.copyWith(overlayState: LoggerOverlayClosed()),
       );
   void minimizeLogger(BuildContext context) {
-    if (_state.overlayState case LoggerOverlayClosed()) {
+    if (state.overlayState case LoggerOverlayClosed()) {
       return openLogger(context);
     }
     _loggerSink.add(
-      _state.copyWith(overlayState: LoggerOverlayMinimized()),
+      state.copyWith(overlayState: LoggerOverlayMinimized()),
     );
   }
 
   void clearNetworkLogs() {
     _loggerSink.add(
-      _state.copyWith(
+      state.copyWith(
         networkLoggerState: const NetworkLoggerState(
           networkLogs: {},
         ),
@@ -79,10 +79,10 @@ class LoggerController {
       options.hashCode.toString(): const NetworkLoggerData().addRequest(options)
     };
     _loggerSink.add(
-      _state.copyWith(
-        networkLoggerState: NetworkLoggerState(
+      state.copyWith(
+        networkLoggerState: state.networkLoggerState.copyWith(
           networkLogs: {
-            ..._state.networkLoggerState.networkLogs,
+            ...state.networkLoggerState.networkLogs,
             ...newRequest,
           },
         ),
@@ -93,7 +93,7 @@ class LoggerController {
   void addResultLog({required Response? response, NetworkError? error}) {
     final options = response?.requestOptions;
     final networkLog =
-        _state.networkLoggerState.networkLogs[options.hashCode.toString()];
+        state.networkLoggerState.networkLogs[options.hashCode.toString()];
     if (networkLog == null) return;
 
     final newRequest = {
@@ -102,16 +102,55 @@ class LoggerController {
     };
 
     _loggerSink.add(
-      _state.copyWith(
+      state.copyWith(
         networkLoggerState: NetworkLoggerState(
           networkLogs: {
-            ..._state.networkLoggerState.networkLogs,
+            ...state.networkLoggerState.networkLogs,
             ...newRequest,
           },
         ),
       ),
     );
   }
+
+  void filterLogs(
+    NetLogFilter filter,
+  ) {
+    _loggerSink.add(
+      state.copyWith(
+        networkLoggerState: state.networkLoggerState.copyWith(filter: filter),
+      ),
+    );
+  }
+
+  void clearFilter() {
+    _loggerSink.add(
+      state.copyWith(
+        networkLoggerState: state.networkLoggerState.clearFilter(),
+      ),
+    );
+  }
+}
+
+extension LoggerControllerExt on LoggerController {
+  Stream<NetworkLoggerState> get networkLoggerStream => loggerStream.transform(
+        StreamTransformer.fromHandlers(
+          handleData: (data, sink) {
+            if (prev?.networkLoggerState == data.networkLoggerState) return;
+            sink.add(data.networkLoggerState);
+          },
+        ),
+      );
+
+  Stream<NetLogFilter?> get netLogFilterStream =>
+      loggerStream.transform<NetLogFilter?>(
+        StreamTransformer.fromHandlers(
+          handleData: (data, sink) {
+            if (prev?.networkLoggerState == data.networkLoggerState) return;
+            sink.add(data.networkLoggerState.filter);
+          },
+        ),
+      );
 }
 
 class LogInfo extends StringBuffer {
