@@ -113,23 +113,32 @@ class LoggerController {
     );
   }
 
-  void filterLogs(
-    NetLogFilter filter,
-  ) {
+  void filterLogs({
+    MethodFilter? methodFilter,
+    StatusFilter? statusFilter,
+  }) {
     _loggerSink.add(
       state.copyWith(
-        networkLoggerState: state.networkLoggerState.copyWith(filter: filter),
+        networkLoggerState: state.networkLoggerState.copyWith(
+          methodFilter: methodFilter,
+          statusFilter: statusFilter,
+        ),
       ),
     );
   }
 
-  void clearFilter() {
-    _loggerSink.add(
-      state.copyWith(
-        networkLoggerState: state.networkLoggerState.clearFilter(),
-      ),
-    );
-  }
+  void clearFilter() => filterLogs(
+        methodFilter: MethodFilter.none,
+        statusFilter: StatusFilter.none,
+      );
+
+  void clearMethodFilter() => filterLogs(
+        methodFilter: MethodFilter.none,
+      );
+
+  void clearStatusFilter() => filterLogs(
+        statusFilter: StatusFilter.none,
+      );
 }
 
 extension LoggerControllerExt on LoggerController {
@@ -138,16 +147,6 @@ extension LoggerControllerExt on LoggerController {
           handleData: (data, sink) {
             if (prev?.networkLoggerState == data.networkLoggerState) return;
             sink.add(data.networkLoggerState);
-          },
-        ),
-      );
-
-  Stream<NetLogFilter?> get netLogFilterStream =>
-      loggerStream.transform<NetLogFilter?>(
-        StreamTransformer.fromHandlers(
-          handleData: (data, sink) {
-            if (prev?.networkLoggerState == data.networkLoggerState) return;
-            sink.add(data.networkLoggerState.filter);
           },
         ),
       );

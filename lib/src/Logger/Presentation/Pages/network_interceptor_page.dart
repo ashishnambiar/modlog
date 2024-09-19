@@ -112,12 +112,11 @@ class _NetLogFilterWidgetState extends State<NetLogFilterWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<NetLogFilter?>(
-      initialData: loggerController.state.networkLoggerState.filter,
-      stream: loggerController.netLogFilterStream,
+    return StreamBuilder<NetworkLoggerState>(
+      initialData: loggerController.state.networkLoggerState,
+      stream: loggerController.networkLoggerStream,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Text('null');
-        final filter = snapshot.data;
+        final netLogState = snapshot.data;
         return Scrollbar(
           thumbVisibility: true,
           child: SingleChildScrollView(
@@ -126,6 +125,46 @@ class _NetLogFilterWidgetState extends State<NetLogFilterWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('Status Filter',
+                            style: Theme.of(context).textTheme.titleLarge),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          loggerController.clearStatusFilter();
+                        },
+                        icon: const Icon(Icons.clear),
+                        label: const Text('Clear'),
+                      ),
+                    ],
+                  ),
+                  Wrap(
+                    spacing: 10,
+                    children: List.generate(
+                      StatusFilter.visible.length,
+                      (index) {
+                        return FilterChip(
+                          showCheckmark: false,
+                          onSelected: (value) {
+                            loggerController.filterLogs(
+                              statusFilter: StatusFilter.visible[index],
+                            );
+                          },
+                          selected: netLogState?.statusFilter ==
+                              StatusFilter.visible[index],
+                          label: Text(
+                            StatusFilter //
+                                .visible[index]
+                                .name,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  //
                   const SizedBox(
                     height: 20,
                   ),
@@ -137,7 +176,7 @@ class _NetLogFilterWidgetState extends State<NetLogFilterWidget> {
                       ),
                       ElevatedButton.icon(
                         onPressed: () {
-                          loggerController.clearFilter();
+                          loggerController.clearMethodFilter();
                         },
                         icon: const Icon(Icons.clear),
                         label: const Text('Clear'),
@@ -147,22 +186,20 @@ class _NetLogFilterWidgetState extends State<NetLogFilterWidget> {
                   Wrap(
                     spacing: 10,
                     children: List.generate(
-                      MethodType.values.length,
+                      MethodFilter.visible.length,
                       (index) {
                         return FilterChip(
+                          showCheckmark: false,
                           onSelected: (value) {
                             loggerController.filterLogs(
-                              MethodFilter(MethodType.values[index]),
+                              methodFilter: MethodFilter.visible[index],
                             );
                           },
-                          selected: switch (filter) {
-                            MethodFilter(method: final method) =>
-                              method == MethodType.values[index],
-                            StatusFilter() || null => false,
-                          },
+                          selected: netLogState?.methodFilter ==
+                              MethodFilter.visible[index],
                           label: Text(
-                            MethodType //
-                                .values[index]
+                            MethodFilter //
+                                .visible[index]
                                 .name
                                 .toUpperCase(),
                           ),

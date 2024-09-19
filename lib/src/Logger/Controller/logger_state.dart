@@ -81,49 +81,59 @@ final class LoggerOverlayOpened extends LoggerOverlayState {
 
 final class NetworkLoggerState extends Equatable {
   final Map<String, NetworkLoggerData> networkLogs;
-  final NetLogFilter? filter;
+  final MethodFilter methodFilter;
+  final StatusFilter statusFilter;
   const NetworkLoggerState({
     required this.networkLogs,
-    this.filter,
+    this.methodFilter = MethodFilter.none,
+    this.statusFilter = StatusFilter.none,
   });
 
   int get count => filteredLogs.length;
 
   Map<String, NetworkLoggerData> get filteredLogs {
     final logs = <String, NetworkLoggerData>{};
+    if (methodFilter == MethodFilter.none && //
+        statusFilter == StatusFilter.none) {
+      return networkLogs;
+    }
+
     for (final e in networkLogs.entries) {
-      switch (filter) {
-        case MethodFilter(method: final method):
-          if (e.value.request?.method.toLowerCase() ==
-              method.name.toLowerCase()) {
-            logs.addEntries([e]);
-          }
-        case StatusFilter():
-        case null:
-          return networkLogs;
+      if (methodFilter != MethodFilter.none) {
+        if (e.value.request?.method.toLowerCase() !=
+            methodFilter.name.toLowerCase()) {
+          continue;
+        }
       }
+      if (statusFilter != StatusFilter.none) {
+        if (statusFilter !=
+            StatusFilter.fromInt(
+              e.value.result?.response?.statusCode ?? 0,
+            )) {
+          continue;
+        }
+      }
+      logs.addEntries([e]);
     }
     return logs;
   }
 
   NetworkLoggerState copyWith({
     Map<String, NetworkLoggerData>? networkLogs,
-    NetLogFilter? filter,
+    MethodFilter? methodFilter,
+    StatusFilter? statusFilter,
   }) =>
       NetworkLoggerState(
         networkLogs: networkLogs ?? this.networkLogs,
-        filter: filter ?? this.filter,
-      );
-
-  NetworkLoggerState clearFilter() => NetworkLoggerState(
-        networkLogs: networkLogs,
-        filter: null,
+        methodFilter: methodFilter ?? this.methodFilter,
+        statusFilter: statusFilter ?? this.statusFilter,
       );
 
   @override
   List<Object?> get props => [
         networkLogs,
-        filter,
+        methodFilter,
+        statusFilter,
       ];
 }
 
@@ -134,7 +144,7 @@ sealed class NetLogFilter extends Equatable {
   List<Object?> get props => [];
 }
 
-enum MethodType {
+enum MethodFilter {
   get,
   post,
   put,
@@ -143,37 +153,50 @@ enum MethodType {
   head,
   options,
   trace,
+
+  none,
+  ;
+
+  static List<MethodFilter> get visible =>
+      values.where((e) => e != none).toList();
 }
 
-class MethodFilter extends NetLogFilter {
-  const MethodFilter(this.method);
-  final MethodType method;
-
-  @override
-  List<Object?> get props => [method];
-}
-
-enum StatusType {
+enum StatusFilter {
   informational(100, 199),
   successful(200, 299),
   redirection(300, 399),
   clientError(400, 499),
-  serverError(500, 599);
+  serverError(500, 599),
+
+  none(0, 0),
+  ;
 
   final int max;
   final int min;
-  const StatusType(
+  const StatusFilter(
     this.max,
     this.min,
   );
-}
 
-class StatusFilter extends NetLogFilter {
-  const StatusFilter(this.status);
-  final StatusType status;
+  static List<StatusFilter> get visible =>
+      values.where((e) => e != none).toList();
 
-  @override
-  List<Object?> get props => [status];
+  static StatusFilter fromInt(int value) {
+    switch (value) {
+      case >= 100 && <= 199:
+        return informational;
+      case >= 200 && <= 299:
+        return successful;
+      case >= 300 && <= 399:
+        return redirection;
+      case >= 400 && <= 499:
+        return clientError;
+      case >= 500 && <= 599:
+        return serverError;
+      default:
+        return none;
+    }
+  }
 }
 
 class NetworkLoggerData extends Equatable {
@@ -211,7 +234,6 @@ class NetworkLoggerData extends Equatable {
 
   NetworkLoggerData addResult(
       {required Response? response, NetworkError? error}) {
-    assert(response == null || error == null);
     return copyWith(
       endTime: TimeOfDay.now(),
       result: (response: response, error: error),
