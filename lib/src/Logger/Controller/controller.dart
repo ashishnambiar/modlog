@@ -57,7 +57,7 @@ class LoggerController {
       );
   void minimizeLogger(BuildContext context) {
     if (state.overlayState case LoggerOverlayClosed()) {
-      return openLogger(context);
+      openLogger(context);
     }
     _loggerSink.add(
       state.copyWith(overlayState: LoggerOverlayMinimized()),
@@ -76,7 +76,7 @@ class LoggerController {
 
   void addRequestLog(RequestOptions options) {
     final newRequest = {
-      options.hashCode.toString(): const NetworkLoggerData().addRequest(options)
+      options.extra['id']: const NetworkLoggerData().addRequest(options)
     };
     _loggerSink.add(
       state.copyWith(
@@ -93,11 +93,11 @@ class LoggerController {
   void addResultLog({required Response? response, NetworkError? error}) {
     final options = response?.requestOptions;
     final networkLog =
-        state.networkLoggerState.networkLogs[options.hashCode.toString()];
+        state.networkLoggerState.networkLogs[options?.extra['id']];
     if (networkLog == null) return;
 
     final newRequest = {
-      options.hashCode.toString():
+      options?.extra['id']:
           networkLog.addResult(response: response, error: error)
     };
 

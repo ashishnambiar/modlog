@@ -5,14 +5,20 @@ import 'package:get_it/get_it.dart';
 
 import '../Controller/controller.dart';
 
-class NetworkInterceptor extends Interceptor {
+class NetworkRequestInterceptor extends Interceptor {
   final loggerController = GetIt.I<LoggerController>();
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    options.extra.addAll({'id': '${DateTime.now().microsecondsSinceEpoch}'});
+
     GetIt.I<LoggerController>().addRequestLog(options);
     super.onRequest(options, handler);
   }
+}
+
+class NetworkResponseInterceptor extends Interceptor {
+  final loggerController = GetIt.I<LoggerController>();
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
