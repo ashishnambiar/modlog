@@ -3,16 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../modlog.dart';
 import 'Controller/controller.dart';
 import 'Presentation/Pages/logging_launch_page.dart';
 
 class LoggerScope extends StatefulWidget {
   const LoggerScope({
     super.key,
+    this.customActions = const [],
     required this.child,
   });
 
   final Widget child;
+  final List<DebugAction> customActions;
 
   @override
   State<LoggerScope> createState() => _LoggerWidgetState();
@@ -68,7 +71,10 @@ class _LoggerWidgetState extends State<LoggerScope> {
         builder: (context, snapshot) {
           var minimized = false;
           if (snapshot.data case LoggerOverlayMinimized()) minimized = true;
-          return LoggerLaunchPage(minimized: minimized);
+          return LoggerLaunchPage(
+            minimized: minimized,
+            customActions: widget.customActions,
+          );
         },
       ),
     );
