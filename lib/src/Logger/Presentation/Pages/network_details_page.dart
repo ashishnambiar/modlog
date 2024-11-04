@@ -48,9 +48,12 @@ class _NetworkDetailsPageState extends State<NetworkDetailsPage> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {
+                      if (response?.requestOptions.cURL == null) {
+                        logger(message: 'unable to get cURL');
+                      }
                       Clipboard.setData(
                         ClipboardData(
-                          text: request.cURL,
+                          text: response!.requestOptions.cURL,
                         ),
                       );
                     },
