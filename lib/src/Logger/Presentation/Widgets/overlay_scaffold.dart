@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../Controller/controller.dart';
 import '../../Utils/logger_appbar.dart';
+import '../../logger.dart';
 import '../Pages/logging.dart';
 import '../Pages/network_interceptor_page.dart';
 
@@ -25,32 +26,77 @@ class _OverlayScaffoldState extends State<OverlayScaffold> {
       },
       child: Scaffold(
         appBar: const LoggerAppBar(title: 'Select'),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const NetworkInterceptorPage(),
-                    ),
-                  );
-                },
-                child: const Text('Network'),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const NetworkInterceptorPage(),
+                            ),
+                          );
+                        },
+                        child: const Text('Network'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const LoggingPage(),
+                            ),
+                          );
+                        },
+                        child: const Text('Logging'),
+                      ),
+                      ...CustomLoggerInheritedWidget.of(context)
+                          .customLoggers
+                          .map(
+                            (e) => ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => e.child,
+                                  ),
+                                );
+                              },
+                              child: Text(e.name),
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const LoggingPage(),
-                    ),
-                  );
-                },
-                child: const Text('Logging'),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Debug Actions: ',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-            ],
-          ),
+            ),
+            Wrap(
+              spacing: 8,
+              children: [
+                ...CustomLoggerInheritedWidget.of(context).customActions.map(
+                      (e) => IconButton.filled(
+                        tooltip: e.label,
+                        onPressed: () {
+                          e.onTap();
+                        },
+                        icon: Icon(e.icon),
+                      ),
+                    ),
+              ],
+            ),
+          ],
         ),
       ),
     );

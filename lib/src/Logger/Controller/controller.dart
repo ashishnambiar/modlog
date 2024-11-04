@@ -191,7 +191,7 @@ LogsCallback dLog({String? label, void Function(LogInfo)? onChange}) {
 typedef LogsCallback = LogInfo Function({String? message, String? label});
 
 extension LogsCallbackExt on LogsCallback {
-  void initialize() => GetIt //
-      .I
-      .registerSingleton<LoggerController>(LoggerController());
+  void initialize() {
+    GetIt.I.registerSingleton<LoggerController>(LoggerController());
+  }
 }

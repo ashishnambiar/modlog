@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class DebugAction {
+class CustomAction {
   String label;
   VoidCallback onTap;
   IconData? icon;
 
-  DebugAction({
+  CustomAction({
     required this.label,
     required this.onTap,
     this.icon,
