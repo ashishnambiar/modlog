@@ -65,6 +65,8 @@ class _NetworkInterceptorPageState extends State<NetworkInterceptorPage> {
                       .networkLoggerState
                       .filteredLogs
                       .values
+                      .toList()
+                      .reversed
                       .toList()[index];
                   return ListTile(
                     onTap: () {

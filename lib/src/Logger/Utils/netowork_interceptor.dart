@@ -67,7 +67,7 @@ extension RequestOptionsExtension on RequestOptions {
     if (tryJson.isNotEmpty) {
       buffer
         ..write(' \\\n')
-        ..write("--data-raw '${tryJson.toString()}'");
+        ..write("--data-raw '${jsonEncode(tryJson)}'");
     }
 
     return buffer.toString();
