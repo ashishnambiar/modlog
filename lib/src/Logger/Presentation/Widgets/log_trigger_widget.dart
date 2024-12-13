@@ -8,10 +8,12 @@ class LogTriggerWidget extends StatefulWidget {
   const LogTriggerWidget({
     super.key,
     required this.child,
+    this.isAvailable = true,
     this.maxCount = 5,
   });
   final Widget child;
   final int maxCount;
+  final bool isAvailable;
 
   @override
   State<LogTriggerWidget> createState() => _LogTriggerWidgetState();
@@ -35,6 +37,7 @@ class _LogTriggerWidgetState extends State<LogTriggerWidget> {
             _count = 0;
           },
           onInterrupted: () {
+            if (!widget.isAvailable) return;
             _count++;
             if (_count >= widget.maxCount) {
               loggerController.openLogger(context);
