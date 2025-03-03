@@ -99,7 +99,7 @@ class _NetworkDetailsPageState extends State<NetworkDetailsPage> {
               InkWell(
                 onTap: _toggleRequestBody,
                 child: Container(
-                  color: Colors.amber.withOpacity(.3),
+                  color: Colors.amber.withValues(alpha: .3),
                   child: Text(
                     const JsonEncoder.withIndent(
                       '    ',
@@ -154,7 +154,7 @@ class _NetworkDetailsPageState extends State<NetworkDetailsPage> {
                     onTap: _toggleResponseBody,
                     child: Container(
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.blue.withOpacity(.2),
+                      color: Colors.blue.withValues(alpha: .2),
                       child: Text(
                         const JsonEncoder.withIndent(
                           '    ',

@@ -43,7 +43,6 @@ linter:
     - sort_child_properties_last
     - unawaited_futures
     - unrelated_type_equality_checks
-    - unsafe_html
     - use_full_hex_values_for_flutter_colors
     - valid_regexps
     - avoid_print # Uncomment to disable the `avoid_print` rule
