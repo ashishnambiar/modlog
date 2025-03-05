@@ -1,5 +1,5 @@
 name: modlog
-description: "A new Flutter package project."
+description: "A modular logger for flutter apps that can be modified as per requirement."
 version: 0.0.5
 repository: https://github.com/ashishnambiar/modlog
 homepage:
